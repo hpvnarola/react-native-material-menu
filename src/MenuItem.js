@@ -9,10 +9,10 @@ import {
   View,
 } from 'react-native';
 
-const Touchable =
-  Platform.OS === 'android' && Platform.Version >= 21
-    ? TouchableNativeFeedback
-    : TouchableHighlight;
+const Touchable = Platform.select({
+  android: TouchableNativeFeedback,
+  default: TouchableHighlight,
+});
 
 function MenuItem({
   children,
@@ -22,10 +22,11 @@ function MenuItem({
   onPress,
   style,
   textStyle,
+  withIcon,
   ...props
 }) {
   const touchableProps =
-    Platform.OS === 'android' && Platform.Version >= 21
+    Platform.OS === 'android'
       ? { background: TouchableNativeFeedback.SelectableBackground() }
       : {};
 
@@ -37,17 +38,21 @@ function MenuItem({
       {...props}
     >
       <View style={[styles.container, style]}>
-        <Text
-          ellipsizeMode={ellipsizeMode}
-          numberOfLines={1}
-          style={[
-            styles.title,
-            disabled && { color: disabledTextColor },
-            textStyle,
-          ]}
-        >
-          {children}
-        </Text>
+        {withIcon == false ?
+          <Text
+            ellipsizeMode={ellipsizeMode}
+            numberOfLines={1}
+            style={[
+              styles.title,
+              disabled && { color: disabledTextColor },
+              textStyle,
+            ]}
+          >
+            {children}
+          </Text>
+          :
+          children
+        }
       </View>
     </Touchable>
   );
@@ -58,6 +63,7 @@ MenuItem.defaultProps = {
   disabledTextColor: '#bdbdbd',
   ellipsizeMode: Platform.OS === 'ios' ? 'clip' : 'tail',
   underlayColor: '#e0e0e0',
+  withIcon: false,
 };
 
 const styles = StyleSheet.create({
